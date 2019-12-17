@@ -8,5 +8,7 @@
     <string name="action_share">Share</string>
 
     <string name="up">Up</string>
+    <string name="books_empty">No books available or detected</string>
+    <string name="books_connection">Connect to internet to get books</string>
 
 </resources>
