@@ -5,6 +5,7 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -42,6 +43,7 @@ public class ArticleListActivity extends AppCompatActivity
     private Toolbar mToolbar;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
+    Snackbar snackbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,25 +85,31 @@ public class ArticleListActivity extends AppCompatActivity
     @Override
     public void connection(Boolean connection) {
         viewModel.refresh( this);
-        Snackbar snackbar;
-        if (connection) snackbar = Snackbar.make(mSwipeRefreshLayout, getString(R.string.books_empty), Snackbar.LENGTH_LONG);
-        else snackbar = Snackbar.make(mSwipeRefreshLayout, getString(R.string.books_connection), Snackbar.LENGTH_LONG);
+        if (connection) snackbar = Snackbar.make(mSwipeRefreshLayout, getString(R.string.books_empty), Snackbar.LENGTH_INDEFINITE);
+        else snackbar = Snackbar.make(mSwipeRefreshLayout, getString(R.string.books_connection), Snackbar.LENGTH_INDEFINITE);
+        snackbar.setAction("Ok", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                snackbar.dismiss();
+            }
+        });
         snackbar.show();
     }
 
     @Override
     public void preExecute() {
+        mSwipeRefreshLayout.setRefreshing(true);
     }
 
     @Override
     public void postExecute() {
+        mSwipeRefreshLayout.setRefreshing(false);
         viewModel.getBooks().observe(this, new Observer<List<Book>>() {
             @Override
             public void onChanged(@Nullable List<Book> books) {
                 Log.d(TAG, "Updating list of recipes from LiveData in ViewModel");
                 mAdapter.setBooks(books);
-                mSwipeRefreshLayout.setRefreshing(false);
-
+                if (snackbar != null) snackbar.dismiss();
             }
         });
     }
