@@ -9,7 +9,6 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -21,7 +20,7 @@ import com.example.xyzreader.domain.Book;
 import com.example.xyzreader.remote.ConnectionListener;
 import com.example.xyzreader.remote.MainReceiver;
 import com.example.xyzreader.remote.RemoteListener;
-import com.example.xyzreader.ui.ArticleDetailActivity;
+import com.example.xyzreader.ui.article_detail.ArticleDetailActivity;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
@@ -40,9 +39,7 @@ public class ArticleListActivity extends AppCompatActivity
     private BroadcastReceiver mReceiver;
     private ArticleAdapter mAdapter;
     private static ConnectionListener connectionListener;
-    private Toolbar mToolbar;
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private RecyclerView mRecyclerView;
     Snackbar snackbar;
 
     @Override
@@ -55,12 +52,10 @@ public class ArticleListActivity extends AppCompatActivity
         registerReceiver(mReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         connectionListener = this;
 
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-
-        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
+        mSwipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        RecyclerView mRecyclerView = findViewById(R.id.recycler_view);
 
         GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
         mRecyclerView.setLayoutManager(layoutManager);
@@ -107,7 +102,7 @@ public class ArticleListActivity extends AppCompatActivity
         viewModel.getBooks().observe(this, new Observer<List<Book>>() {
             @Override
             public void onChanged(@Nullable List<Book> books) {
-                Log.d(TAG, "Updating list of recipes from LiveData in ViewModel");
+                Log.d(TAG, "Updating list of books from LiveData in ViewModel");
                 mAdapter.setBooks(books);
                 if (snackbar != null) snackbar.dismiss();
             }

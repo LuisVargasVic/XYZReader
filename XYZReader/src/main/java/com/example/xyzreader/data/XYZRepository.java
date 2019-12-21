@@ -63,4 +63,27 @@ public class XYZRepository {
                     }
                 });
     }
+
+    public LiveData<Book> getBook(int id) {
+        return Transformations.map(mXYZDatabase.xyzDao().getBook(id),
+                new Function<DatabaseBook, Book>() {
+                    @Override
+                    public Book apply(DatabaseBook databaseBook) {
+                        return new Book(
+                                databaseBook.getId(),
+                                databaseBook.getTitle(),
+                                databaseBook.getAuthor(),
+                                databaseBook.getBody(),
+                                databaseBook.getThumb(),
+                                databaseBook.getPhoto(),
+                                databaseBook.getAspect_ratio(),
+                                databaseBook.getPublished_date()
+                        );
+                    }
+                });
+    }
+
+    public LiveData<Integer> getNumberBook() {
+        return mXYZDatabase.xyzDao().getNumberBook();
+    }
 }
