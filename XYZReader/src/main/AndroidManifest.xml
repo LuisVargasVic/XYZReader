@@ -19,7 +19,7 @@
         <uses-library android:name="org.apache.http.legacy" android:required="false" />
 
         <activity
-            android:name=".ui.articles.ArticleListActivity"
+            android:name=".presentation.articles.ArticleListActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,11 +28,11 @@
         </activity>
 
         <activity
-            android:name=".ui.article_detail.ArticleDetailActivity"
-            android:parentActivityName=".ui.articles.ArticleListActivity">
+            android:name=".presentation.article_detail.ArticleDetailActivity"
+            android:parentActivityName=".presentation.articles.ArticleListActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.articles.ArticleListActivity" />
+                android:value=".presentation.articles.ArticleListActivity" />
         </activity>
 
         <service android:name=".data.UpdaterService"

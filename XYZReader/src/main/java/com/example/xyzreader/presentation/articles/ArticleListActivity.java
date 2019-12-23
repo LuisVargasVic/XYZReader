@@ -1,4 +1,4 @@
-package com.example.xyzreader.ui.articles;
+package com.example.xyzreader.presentation.articles;
 
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
@@ -20,7 +20,7 @@ import com.example.xyzreader.domain.Book;
 import com.example.xyzreader.remote.ConnectionListener;
 import com.example.xyzreader.remote.MainReceiver;
 import com.example.xyzreader.remote.RemoteListener;
-import com.example.xyzreader.ui.article_detail.ArticleDetailActivity;
+import com.example.xyzreader.presentation.article_detail.ArticleDetailActivity;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
@@ -43,13 +43,18 @@ public class ArticleListActivity extends AppCompatActivity
     Snackbar snackbar;
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        // Initialize connection receiver before making requests
+        mReceiver = new MainReceiver();
+        registerReceiver(mReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_article_list);
 
-        // Initialize connection receiver before making requests
-        mReceiver = new MainReceiver();
-        registerReceiver(mReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         connectionListener = this;
 
         mSwipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);

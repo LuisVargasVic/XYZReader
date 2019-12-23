@@ -1,4 +1,4 @@
-package com.example.xyzreader.ui.article_detail;
+package com.example.xyzreader.presentation.article_detail;
 
 import android.app.Fragment;
 import android.content.Intent;
@@ -19,17 +19,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.core.app.ShareCompat;
-import androidx.lifecycle.Observer;
 import androidx.palette.graphics.Palette;
 
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.example.xyzreader.R;
 import com.example.xyzreader.domain.Book;
-import com.example.xyzreader.ui.DrawInsetsFrameLayout;
-import com.example.xyzreader.ui.ImageLoaderHelper;
-import com.example.xyzreader.ui.ObservableScrollView;
-import com.example.xyzreader.ui.articles.ArticleListActivity;
+import com.example.xyzreader.presentation.DrawInsetsFrameLayout;
+import com.example.xyzreader.presentation.ImageLoaderHelper;
+import com.example.xyzreader.presentation.ObservableScrollView;
+import com.example.xyzreader.presentation.articles.ArticleListActivity;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -44,10 +43,10 @@ import java.util.GregorianCalendar;
 public class ArticleDetailFragment extends Fragment {
     private static final String TAG = "ArticleDetailFragment";
 
-    public static final String ARG_ITEM_ID = "item_id";
+    public static final String ARG_BOOK = "book";
     private static final float PARALLAX_FACTOR = 1.25f;
 
-    private int mItemId;
+    private Book mBook;
     private View mRootView;
     private int mMutedColor = 0xFF333333;
     private ObservableScrollView mScrollView;
@@ -74,9 +73,9 @@ public class ArticleDetailFragment extends Fragment {
     public ArticleDetailFragment() {
     }
 
-    public static ArticleDetailFragment newInstance(int itemId) {
+    public static ArticleDetailFragment newInstance(Book item) {
         Bundle arguments = new Bundle();
-        arguments.putInt(ARG_ITEM_ID, itemId);
+        arguments.putSerializable(ARG_BOOK, item);
         ArticleDetailFragment fragment = new ArticleDetailFragment();
         fragment.setArguments(arguments);
         return fragment;
@@ -86,8 +85,8 @@ public class ArticleDetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments().containsKey(ARG_ITEM_ID)) {
-            mItemId = getArguments().getInt(ARG_ITEM_ID) + 1;
+        if (getArguments().containsKey(ARG_BOOK)) {
+            mBook = (Book) getArguments().getSerializable(ARG_BOOK);
         }
 
         mIsCard = getResources().getBoolean(R.bool.detail_is_card);
@@ -104,13 +103,8 @@ public class ArticleDetailFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        getActivityCast().viewModel.getBook(mItemId).observe(getActivityCast(), new Observer<Book>() {
-            @Override
-            public void onChanged(Book book) {
-                parsePublishedDate(book.getPublished_date());
-                bindViews(book);
-            }
-        });
+        parsePublishedDate(mBook.getPublished_date());
+        bindViews(mBook);
 
     }
 
@@ -132,7 +126,7 @@ public class ArticleDetailFragment extends Fragment {
             @Override
             public void onScrollChanged() {
                 mScrollY = mScrollView.getScrollY();
-                getActivityCast().onUpButtonFloorChanged(mItemId, ArticleDetailFragment.this);
+                getActivityCast().onUpButtonFloorChanged(mBook.getId(), ArticleDetailFragment.this);
                 mPhotoContainerView.setTranslationY((int) (mScrollY - mScrollY / PARALLAX_FACTOR));
                 updateStatusBar();
             }
@@ -245,7 +239,6 @@ public class ArticleDetailFragment extends Fragment {
                             mRootView.findViewById(R.id.meta_bar)
                                     .setBackgroundColor(mMutedColor);
                             updateStatusBar();
-                            getActivityCast().hide();
                         }
                     }
 

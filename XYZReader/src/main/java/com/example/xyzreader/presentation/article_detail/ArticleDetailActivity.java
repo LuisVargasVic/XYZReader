@@ -1,4 +1,4 @@
-package com.example.xyzreader.ui.article_detail;
+package com.example.xyzreader.presentation.article_detail;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,7 +18,9 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.xyzreader.R;
-import com.example.xyzreader.data.ItemsContract;
+import com.example.xyzreader.domain.Book;
+
+import java.util.List;
 
 /**
  * An activity representing a single Article detail screen, letting you swipe between articles.
@@ -27,9 +28,10 @@ import com.example.xyzreader.data.ItemsContract;
 public class ArticleDetailActivity extends AppCompatActivity {
 
     private static final String TAG = ArticleDetailActivity.class.getSimpleName();
+    public static final String PAGE = "page";
     private long mStartId;
 
-    private long mSelectedItemId;
+    private int mSelectedItemId;
     private int mSelectedItemUpButtonFloor = Integer.MAX_VALUE;
     private int mTopInset;
     ArticleDetailViewModel viewModel;
@@ -48,16 +50,20 @@ public class ArticleDetailActivity extends AppCompatActivity {
 
         mContainerProgressBar = findViewById(R.id.container_progress_bar);
 
-        viewModel.getNumberBook().observe(this, new Observer<Integer>() {
+        mSelectedItemId = getIntent().getIntExtra(PAGE, 0);
+
+        viewModel.getBooks().observe(this, new Observer<List<Book>>() {
             @Override
-            public void onChanged(@Nullable Integer numberBook) {
+            public void onChanged(@Nullable List<Book> books) {
                 Log.d(TAG, "Updating book from LiveData in ViewModel");
-                mPagerAdapter = new MyPagerAdapter(getFragmentManager(), numberBook);
+                mPagerAdapter = new MyPagerAdapter(getFragmentManager(), books);
                 mPager = (ViewPager) findViewById(R.id.pager);
                 mPager.setAdapter(mPagerAdapter);
                 mPager.setPageMargin((int) TypedValue
                         .applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, getResources().getDisplayMetrics()));
                 mPager.setPageMarginDrawable(new ColorDrawable(0x22000000));
+
+                mPager.setCurrentItem(mSelectedItemId);
 
                 mPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
                     @Override
@@ -74,6 +80,7 @@ public class ArticleDetailActivity extends AppCompatActivity {
                         updateUpButtonPosition();
                     }
                 });
+                hide();
             }
         });
 
@@ -86,13 +93,6 @@ public class ArticleDetailActivity extends AppCompatActivity {
             public void onClick(View view) { onSupportNavigateUp();
             }
         });
-
-        if (savedInstanceState == null) {
-            if (getIntent() != null && getIntent().getData() != null) {
-                mStartId = ItemsContract.Items.getItemId(getIntent().getData());
-                mSelectedItemId = mStartId;
-            }
-        }
     }
 
     public void hide() {
@@ -113,31 +113,21 @@ public class ArticleDetailActivity extends AppCompatActivity {
 
     private class MyPagerAdapter extends FragmentStatePagerAdapter {
 
-        private Integer mNumberBook;
+        private List<Book> mBooks;
 
-        public MyPagerAdapter(FragmentManager fm, Integer numberBook) {
+        public MyPagerAdapter(FragmentManager fm, List<Book> books) {
             super(fm);
-            mNumberBook = numberBook;
-        }
-
-        @Override
-        public void setPrimaryItem(ViewGroup container, int position, Object object) {
-            super.setPrimaryItem(container, position, object);
-            ArticleDetailFragment fragment = (ArticleDetailFragment) object;
-            if (fragment != null) {
-                mSelectedItemUpButtonFloor = fragment.getUpButtonFloor();
-                updateUpButtonPosition();
-            }
+            mBooks = books;
         }
 
         @Override
         public Fragment getItem(int position) {
-            return ArticleDetailFragment.newInstance(position);
+            return ArticleDetailFragment.newInstance(mBooks.get(position));
         }
 
         @Override
         public int getCount() {
-            return mNumberBook;
+            return mBooks.size();
         }
     }
 }
